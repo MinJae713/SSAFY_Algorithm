@@ -1,6 +1,7 @@
 package m8.d21;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
@@ -35,7 +36,7 @@ public class Maze2 {
 	private static boolean targetSucceed;
 
 	public static void main(String[] args) throws IOException {
-//		System.setIn(new FileInputStream("input.txt"));
+		System.setIn(new FileInputStream("input.txt"));
 		initializeTest();
 		for (int testCase=1; testCase<=10; testCase++) {
 			initialize();
