@@ -1,31 +1,37 @@
 package m8.d25;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * [문제 풀이]
- * 1. 필드의 각 지점에 대해 반복
- * 	1.1. 현재 지점이 *이라면 다음 반복 수행
- * 2. 각 지점의 8방향 중 접근할 수 있는 방향의 값이 모두 .인지 확인
- * 3. 모두 .이라면 접근할 수 있는 두 지점에 대해 union
- * 	3.1. 파라미터는 현재 지점 및 합칠 대상 지점
- * 	3.2. 각 지점이 속한 집합의 대표에 해당하는 지점 확인(find)
- * 		3.2.1. 파라미터는 확인할 위치 해당 행 및 열(row, column)
- * 		3.2.2. 그 행과 열의 부모에 해당하는 행과 열이 row, column과 동일하면?
- * 			3.2.2.1. 해당 행 및 열 값을 int[] 형으로 반환
- * 		3.2.3. 다음 행 및 열 값을 파라미터로 find 재귀 호출, 
- * 			      호출 결과를 row, column의 부모로 입력
- * 	3.3. 현재 지점이 속한 집합의 대표(currentRoot)와 합칠 대상(targetRoot)쪽의 대표가 동일하다면?
- * 		3.3.1. 함수 실행 종료
- * 	3.4. currentRoot의 부모 Row, Column에 targetRoot Row, Column 입력
- * 4. 필드의 각 지점에 대해 반복
- * 	4.1. 현재 지점이 *이라면 다음 반복 수행
- * 5. 각 지점에 대해 find 호출 -> 결과로 나온 row, column 위치 해당 isRoot 값이 처음 방문했는지 확인
- * 	5.1. 방문하지 않았다면? 해당 위치 true 지정, 클릭 수 1 증가
- *
+ * 1. 표의 모든 위치에 대해 반복(row, column)
+ * 	1.1. (row, column) 위치가 지뢰거나, 이미 방문한 위치면 다음 반복 수행
+ * 	1.2. (row, column) 위치 주변에 지뢰가 있다면? 
+ * 		1.2.1. 주변에 지뢰가 있는 위치 담는 배열에 입력(searchedMines)
+ * 	1.3. 지뢰가 없다면?
+ *	 		1.3.1. 표 각각 위치 주변에 지뢰가 없는 영역 탐색(searchNoneMineArea)
+ * 		1.3.2. 파라미터는 현재 행 및 열 (position)
+ * 2. 현재 행 및 열 큐(queue)에 enque
+ * 3. 현재 행 방문 여부 true
+ * 4. queue에 요소가 있는 동안 반복
+ * 	4.1. queue에서 요소 deque (current)
+ * 	4.2. current위치의 8방향에 지뢰가 있는지 확인 (searchMine)
+ * 		4.2.1. 8방향의 지뢰 갯수 계산
+ * 	4.3. 지뢰가 최소 하나 있다면 다음 반복 실행
+ * 	4.4. current의 8방향에 대해 반복(nextColumn, nextRow)
+ * 		4.4.1. 다음 방향이 범위 내에 없거나 이미 방문했다면 다음 반복 수행
+ * 		4.4.2. 다음 방향 큐에 enque
+ * 		4.4.3. 다음 방향 방문 여부 true
+ * 5. 클릭 횟수(clickCount) 1 증가
+ * 6. 주변에 지뢰가 있는 지점들 처리(searchMineArea)
+ * 	6.1. searchedMines의 각 지점들에 대해 반복
+ * 	6.2. 아직 방문하지 않은 지점들 수 만큼 clickCount 증가
  */
 public class Mine {
 	private static BufferedReader reader;
@@ -33,27 +39,26 @@ public class Mine {
 	private static int[][] delta;
 	private static int bound;
 	private static char[][] mineField;
-	private static int[][] parentPositionRow;
-	private static int[][] parentPositionColumn;
-	private static boolean[][] isRoot;
+	private static boolean[][] visited;
 	private static int clickCount;
+	private static List<int[]> searchedMines;
 
 	public static void main(String[] args) throws IOException {
-		System.setIn(new FileInputStream("input.txt"));
+//		System.setIn(new FileInputStream("input.txt"));
 		int testCaseCount = initializeTest();
 		for (int testCase=1; testCase<=testCaseCount; testCase++) {
 			initialize();
 			// logic
-			unionAccessablePosition();
-//			for (int row=0; row<bound; row++) {
-//				for (int column=0; column<bound; column++) 
-//					System.out.printf("(%d, %d) ", 
-//							parentPositionColumn[row][column], 
-//							parentPositionRow[row][column]);
-//				System.out.println();
-//			}
-//			System.out.println();
-			countClick();
+			for (int row=0; row<bound; row++)
+				for (int column=0; column<bound; column++) {
+					if (mineField[row][column] == '*' || 
+							visited[row][column])
+						continue;
+					if (searchMine(row, column) > 0)
+						searchedMines.add(new int[] {row, column});
+					else searchNoneMineArea(new int[] {row, column});
+				}
+			searchMineArea();
 			builder.append("#").append(testCase).
 					append(" ").append(clickCount).append("\n");
 		}
@@ -61,87 +66,79 @@ public class Mine {
 		reader.close();
 	}
 
-	private static void countClick() {
-		for (int row=0; row<bound; row++)
-			for (int column=0; column<bound; column++) {
-				if (mineField[row][column] == '*') continue;
-				int[] root = find(row, column);
-				if (!isRoot[root[1]][root[0]]) {
-//					System.out.printf("(%d, %d)\n", column, row);
-					isRoot[root[1]][root[0]] = true;
-					clickCount++;
-				}
+	private static void searchNoneMineArea(int[] position) {
+		// 주변에 지뢰가 없는 위치만 수행됨
+		Queue<int[]> queue = new ArrayDeque<>();
+		queue.offer(position);
+		visited[position[0]][position[1]] = true;
+		while (!queue.isEmpty()) {
+			int[] current = queue.poll();
+			// 주변 지뢰가 없는 위치에서 접근할 수 있기에 enque 되었지만,
+			// deque되어 주변 지뢰가 있는지 보니까 하나 이상 있는 경우임
+			// 주변에 지뢰가 있지만 방문 여부는 enque 과정에서 true로 지정됨 (1)
+			if (searchMine(current[0], current[1]) > 0) continue;
+			// 지뢰가 없는 경우 -> 주변에 접근할 수 있는 방향들 방문 표시 및 enque
+			for (int deltaIndex=0; deltaIndex<8; deltaIndex++) {
+				int nextRow = current[0] + delta[deltaIndex][0];
+				int nextColumn = current[1] + delta[deltaIndex][1];
+				if (!inBound(nextRow, nextColumn)) continue;
+				else if (visited[nextRow][nextColumn]) continue;
+				queue.offer(new int[] {nextRow, nextColumn});
+				visited[nextRow][nextColumn] = true;
 			}
-//		System.out.println();
+		}
+		clickCount++; 
+		// 주변에 지뢰가 없음으로 인해 
+		// 한꺼번에 많이 표시될 수 있는 부분에 대한 처리
+		// 클릭 한 번으로 가능함
 	}
 
-	private static void unionAccessablePosition() {
-		for (int row=0; row<bound; row++)
-			for (int column=0; column<bound; column++) {
-				if (mineField[row][column] == '*') continue;
-				boolean hasMine = false;
-				int[][] accessAble = new int[8][2];
-				int accessAbleSize = 0;
-				for (int deltaIndex=0; deltaIndex<8 && !hasMine; deltaIndex++) {
-					int nextColumn = column+delta[deltaIndex][0];
-					int nextRow = row+delta[deltaIndex][1];
-					if (!(0<=nextColumn && nextColumn<bound &&
-							0<=nextRow && nextRow<bound)) continue;
-					hasMine = mineField[nextRow][nextColumn] == '*';
-					if (!hasMine) 
-						accessAble[accessAbleSize++] = new int[] {nextColumn, nextRow};
-				}
-				if (hasMine) continue;
-				System.out.printf("지뢰 없음: (%d, %d)\n", column, row);
-				for (int accessAbleIndex=0; accessAbleIndex<accessAbleSize; accessAbleIndex++) {
-					int accessAbleColumn = accessAble[accessAbleIndex][0];
-					int accessAbleRow = accessAble[accessAbleIndex][1];
-					union(row, column, accessAbleRow, accessAbleColumn);
-				}
-			}
+	private static int searchMine(int currentRow, int currentColumn) {
+		int mineCount = 0;
+		for (int deltaIndex=0; deltaIndex<8; deltaIndex++) {
+			int nextRow = currentRow + delta[deltaIndex][0];
+			int nextColumn = currentColumn + delta[deltaIndex][1];
+			if (!inBound(nextRow, nextColumn)) continue;
+			mineCount += mineField[nextRow][nextColumn] == '*' ? 1 : 0;
+		}
+		return mineCount;
+	}
+	
+	private static void searchMineArea() {
+		// 주변에 지뢰가 최소 하나 이상 있는 지점들 처리
+		for (int[] point : searchedMines)  {
+			// 지뢰가 있지만 방문 여부가 true인 지점?
+			// 주변 지뢰가 없는 지점을 통해 방문 처리가 이뤄진 지점임
+			// (1) -> 이미 true 처리가 됨에 따라 해당 지점은 이미 클릭이 된 것
+			clickCount += visited[point[0]][point[1]] ? 0 : 1;
+			visited[point[0]][point[1]] = true; // 방문 여부 체크
+		}
 	}
 
-	private static void union(int row, int column, int accessAbleRow, int accessAbleColumn) {
-		int[] currentRoot = find(row, column);
-		int[] targetRoot = find(accessAbleRow, accessAbleColumn);
-		if (currentRoot[0] == targetRoot[0] && currentRoot[1] == targetRoot[1]) return;
-		parentPositionColumn[currentRoot[1]][currentRoot[0]] = targetRoot[0]; // 열 입력
-		parentPositionRow[currentRoot[1]][currentRoot[0]] = targetRoot[1]; // 행 입력
-	}
-
-	private static int[] find(int row, int column) {
-		if (row == parentPositionRow[row][column] && 
-			column == parentPositionColumn[row][column])
-			return new int[] {column, row};
-		int parentRow = parentPositionRow[row][column];
-		int parentColumn = parentPositionColumn[row][column];
-		int[] parentFinded = find(parentRow, parentColumn);
-		parentPositionColumn[row][column] = parentFinded[0];
-		parentPositionRow[row][column] = parentFinded[1];
-		return parentFinded;
+	private static boolean inBound(int row, int column) {
+		return 0<=row && row<bound &&
+				0<=column && column<bound;
 	}
 
 	private static int initializeTest() throws IOException {
 		reader = new BufferedReader(new InputStreamReader(System.in));
 		builder = new StringBuilder();
-		delta = new int[][] {{0, -1}, {1, -1}, {1, 0}, {1, 1}, 
-			{0, 1}, {-1, 1}, {-1, 0}, {-1, -1}};
+		delta = new int[][] {
+			{-1, 0}, {-1, 1},
+			{0, 1}, {1, 1},
+			{1, 0}, {1, -1},
+			{0, -1}, {-1, -1}
+		};
 		int testCaseCount = Integer.parseInt(reader.readLine().trim());
 		return testCaseCount;
 	}
 	private static void initialize() throws IOException {
 		bound = Integer.parseInt(reader.readLine().trim());
-		mineField = new char[bound][];
+		mineField = new char[bound][bound];
+		visited = new boolean[bound][bound];
 		for (int row=0; row<bound; row++)
 			mineField[row] = reader.readLine().trim().toCharArray();
-		parentPositionRow = new int[bound][bound];
-		parentPositionColumn = new int[bound][bound];
-		for (int row=0; row<bound; row++)
-			for (int column=0; column<bound; column++) {
-				parentPositionRow[row][column] = row;
-				parentPositionColumn[row][column] = column;
-			}
-		isRoot = new boolean[bound][bound];
 		clickCount = 0;
+		searchedMines = new ArrayList<int[]>();
 	}
 }
