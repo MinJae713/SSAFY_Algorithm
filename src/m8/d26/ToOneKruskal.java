@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
  * 	4.5. 최소 환경 부담금 합(minimumCharge)에 해당 터널의 환경 부담금 합산
  * 5. minimumCharge에서 소숫점 1의 자리까지 반올림한 값 계산
  */
-public class ToOne {
+public class ToOneKruskal {
 	static class Turnel implements Comparable<Turnel>{
 		int from;
 		int to;
