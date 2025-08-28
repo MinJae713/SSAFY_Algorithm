@@ -1,7 +1,6 @@
 package m8.d28;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
@@ -67,14 +66,14 @@ public class BreakBlocks {
 	private static int maxBreakBlocks;
 
 	public static void main(String[] args) throws IOException {
-		System.setIn(new FileInputStream("sample_input.txt"));
+//		System.setIn(new FileInputStream("sample_input.txt"));
 		int testCaseCount = initializeTest();
 		for (int testCase=1; testCase<=testCaseCount; testCase++) {
 			initialize();
 			// logic
 			combinateBizz(0, 0);
 			builder.append("#").append(testCase).append(" ").
-						append(blockCount-maxBreakBlocks).append("\n");
+					append(blockCount-maxBreakBlocks).append("\n");
 		}
 		System.out.print(builder);
 		reader.close();
