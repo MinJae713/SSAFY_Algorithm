@@ -1,7 +1,6 @@
 package homeworks.m9.d2;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
@@ -14,7 +13,7 @@ import java.util.StringTokenizer;
  * 2. 방문 표시(visited) 및 위치 개수(count) 증가
  * 3. 큐에 요소가 있는 동안 반복
  * 4. 큐에서 요소 poll (currentX, Y, Time)
- * 5. 다음 시간이 제한 소요 시간(limitTime)보다 크다면 continue
+ * 5. 현재 시간이 제한 소요 시간(limitTime)이라면 continue
  * 5. 해당 위치의 터널 유형 반환 (currentTurnelType)
  * 6. 그 터널에서 이동할 수 있는 방향에 대해 반복 (deltaType)
  * 7. 다음 위치 값 저장(nextX, nextY)
@@ -41,7 +40,7 @@ public class Criminal {
 	private static int count;
 
 	public static void main(String[] args) throws IOException {
-		System.setIn(new FileInputStream("resources/sample_input.txt"));
+//		System.setIn(new FileInputStream("resources/sample_input.txt"));
 		int testCaseCount = initializeTest();
 		for (int testCase=1; testCase<=testCaseCount; testCase++) {
 			initialize();
@@ -54,7 +53,7 @@ public class Criminal {
 				int currentY = current[0];
 				int currentX = current[1];
 				int currentTime = current[2];
-				if (currentTime+1 == limitTime) continue;
+				if (currentTime == limitTime) continue;
 				int currentTurnelType = turnnelMap[currentY][currentX];
 				for (int deltaType : turnelDelta[currentTurnelType]) {
 					int nextY = currentY+delta[deltaType][0];
@@ -79,7 +78,8 @@ public class Criminal {
 	private static boolean checkNext(int x, int y) {
 		return 0<=x && x<width &&
 				0<=y && y<height &&
-				!visited[y][x];
+				!visited[y][x] && 
+				turnnelMap[y][x] != 0;
 	}
 
 	private static int initializeTest() throws IOException {
@@ -114,8 +114,13 @@ public class Criminal {
 		startX = Integer.parseInt(tokenizer.nextToken());
 		limitTime = Integer.parseInt(tokenizer.nextToken());
 		turnnelMap = new int[height][width];
+		for (int row=0; row<height; row++) {
+			tokenizer = new StringTokenizer(reader.readLine().trim());
+			for (int column=0; column<width; column++)
+				turnnelMap[row][column] = Integer.parseInt(tokenizer.nextToken());
+		}
 		visited = new boolean[height][width];
-		count = 0;
+		count = 1;
 	}
 
 }
