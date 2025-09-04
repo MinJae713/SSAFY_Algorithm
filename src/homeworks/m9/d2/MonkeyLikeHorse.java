@@ -19,11 +19,13 @@ import java.util.StringTokenizer;
  * 	4.1. 원숭이가 다음으로 이동할 위치를 못 찾은 경우임
  * 	4.2. 반복 종료
  * 5. 해당 위치 방문 true
- * 6. horseCount가 말처럼 이동할 수 있는 횟수(maxHorseCount) 이상이라면? 시작 deltaIndex는 8, 아니라면 0으로 지정
+ * 6. horseCount가 말처럼 이동할 수 있는 횟수(maxHorseCount) 이상이라면? 
+ * 	6.1. 시작 deltaIndex는 8, 아니라면 0으로 지정
  * 7. 원숭이가 이동할 수 있는 위치에 대해 반복(deltaIndex)
  * 	7.1. 다음 위치가 범위 내에 있고, 방문하지 않았으며, 1이 아닌지 확인
  * 	7.2. 다음 위치의 MinimumCount movement와 현재 위치의
- * 		 MinimumCount movement+1 비교 -> 후자가 더 작다면?
+ * 		 MinimumCount movement+1 비교 -> 후자가 더 작다거나,
+ * 		 두 값이 같지만 현재 위치의 말 이동수가 다음 위치의 말 이동수 보다 작다면?
  * 		7.2.1. 다음 위치의 MinimumCount movement는 현재 위치의
  * 		 	   MinimumCount movement+1로 입력
  * 		7.2.2. 다음 위치의 MinimumCount horseCount는
@@ -62,6 +64,7 @@ public class MonkeyLikeHorse {
 			int minimumMovement = Integer.MAX_VALUE;
 			int currentRow = -1, currentColumn = -1;
 			int horseCount = 0;
+			// 시작점으로부터 최소 비용 위치 탐색
 			for (int row=0; row<height; row++)
 				for (int column=0; column<width; column++) {
 					if (visited[row][column]) continue;
@@ -73,16 +76,25 @@ public class MonkeyLikeHorse {
 						horseCount = minimumCounts[row][column].horseCount;
 					}
 				}
+			// 모든 위치를 방문했거나, 방문하지 않았어도 모든 위치 최소 비용이 MAX_VALUE
 			if (currentRow == -1 && currentColumn == -1) break;
 			visited[currentRow][currentColumn] = true;
+			// 찾은 위치가 마지막 위치
 			if (currentRow == height-1 && currentColumn == width-1) break;
 			int startDeltaIndex = horseCount>=maxHorseCount ? 8 : 0;
+			System.out.printf("(%d, %d) 인접들![말 카운트:%d]\n================\n", currentColumn, currentRow, horseCount);
 			for (int deltaIndex=startDeltaIndex; deltaIndex<12; deltaIndex++) {
 				int nextRow = currentRow+delta[deltaIndex][0];
 				int nextColumn = currentColumn+delta[deltaIndex][1];
+				System.out.printf("(%d, %d)[%b]\n", nextColumn, nextRow, checkNext(nextRow, nextColumn));
 				if (!checkNext(nextRow, nextColumn)) continue;
 				else if (minimumCounts[nextRow][nextColumn].movement > 
-						minimumCounts[currentRow][currentColumn].movement+1) {
+						minimumCounts[currentRow][currentColumn].movement+1 ||
+						(minimumCounts[nextRow][nextColumn].movement == 
+						minimumCounts[currentRow][currentColumn].movement+1 && 
+						minimumCounts[nextRow][nextColumn].horseCount > 
+						minimumCounts[currentRow][currentColumn].horseCount)) {
+					// 움직임 수가 더 적은 경우 뿐만 아니라, 움직임 수가 같더라도 말 움직임 수가 더 적으면 초기화
 					minimumCounts[nextRow][nextColumn].movement = 
 							minimumCounts[currentRow][currentColumn].movement+1;
 					minimumCounts[nextRow][nextColumn].horseCount = 
@@ -91,6 +103,7 @@ public class MonkeyLikeHorse {
 						minimumCounts[nextRow][nextColumn].horseCount++;
 				}
 			}
+			System.out.println();
 		}
 		System.out.println(minimumCounts[height-1][width-1].movement == INF ? 
 				-1 : minimumCounts[height-1][width-1].movement);
@@ -108,7 +121,7 @@ public class MonkeyLikeHorse {
 		System.out.println("[최소 비용]");
 		for (int row=0; row<height; row++) {
 			for (int column=0; column<width; column++)
-				System.out.printf("%-3d", minimumCounts[row][column].movement == INF ? 9 : minimumCounts[row][column].movement);
+				System.out.printf("%-3d", minimumCounts[row][column].movement == INF ? 99 : minimumCounts[row][column].movement);
 			System.out.println();
 		}
 		System.out.println("[말 카운트]");
