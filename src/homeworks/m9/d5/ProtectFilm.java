@@ -77,9 +77,9 @@ public class ProtectFilm {
 			if (drugInputed[row]) continue;
 			int originStatus = films[row];
 			drugInputed[row] = true;
-			films[row] = ~(1<<width);
-			currentDrugCount = checkPassAvailable(drugCount+1);
 			films[row] = 0;
+			currentDrugCount = checkPassAvailable(drugCount+1);
+			films[row] = ~(1<<width);
 			currentDrugCount = Integer.min(currentDrugCount, 
 					checkPassAvailable(drugCount+1));
 			films[row] = originStatus;
@@ -90,7 +90,7 @@ public class ProtectFilm {
 
 	private static boolean checkFilm() {
 		boolean nonNumericColumn = false;
-		forLog();
+//		forLog();
 		for (int columnBit=1; columnBit<(1<<width) && 
 				!nonNumericColumn; columnBit<<=1) {
 //			System.out.printf("[%d]\n", columnBit);

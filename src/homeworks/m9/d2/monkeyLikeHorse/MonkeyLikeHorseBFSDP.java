@@ -1,4 +1,4 @@
-package homeworks.m9.d2;
+package homeworks.m9.d2.monkeyLikeHorse;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
