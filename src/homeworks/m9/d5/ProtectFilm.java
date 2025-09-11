@@ -1,7 +1,6 @@
 package homeworks.m9.d5;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
@@ -13,39 +12,33 @@ import java.util.StringTokenizer;
  * 		  필름 값(films)의 AIndex 번째 비트에 1 추가
  * 2. checkPassAvailable(): 약물 추가 상태에 따른 
  * 							성능 검사 통과에 필요한 약물 투입 횟수 반환
- * 	2.1. 파라미터는 약품 넣은 횟수(drugCount), 약품 투여 횟수의 최솟값 반환
- * 	2.2. 필름 검사 -> 약품 투여 후 재귀 과정으로 이뤄짐
- * 3. 필름 상태 검사 (상태 검사에 실패하면 true가 반환됨)
- * 	3.1. 연속되지 않은 열(nonNumericColumn) 발견 여부 false로 지정
- * 	3.2. 첫번째 열에서 마지막 열 까지 반복(columnBit)
- * 		3.2.1. columnBit가 1<<width보다 작고,
- * 			     연속되지 않은 열이 false인 동안 수행
- * 		3.2.3. columnBit를 한 칸씩 앞으로 옮김 (column<<=1)
- * 	3.3. 연속 타입 셀 개수(numericCell) 0으로 초기화
- * 	3.4. 현재 셀 타입은 0번째 행의 column위치 셀 타입으로 지정
- * 		3.4.1. 0번째 위치 값 & columnBit
- * 	3.5. 두번째 행에서 마지막 행 까지 반복(row)
- * 		3.5.1. numermicCell이 합격 기준(passCount)보다 작은 경우 반복
- * 		3.5.2. row번째 위치 columnBit값이 현재 셀 타입과 동일하다면?
- * 			3.5.2.1. numericCell 1 증가
- * 		3.5.3. 다르다면? 
- * 			3.5.3.1. 해당 위치 columnBit 값으로 현재 셀 타입 변경, 
- * 			3.5.3.2. numericCell 0으로 초기화
- * 	3.6. numericCell이 합격 기준(passCount)보다 작다면? 
- * 		3.6.1. 연속되지 않은 열 발견 여부 true 지정
- * 	3.7. nonNumericColumn 값 반환
- * 4. 필름 상태 검사가 true라면 약품 투여
- * 	4.1. 모든 행에 대해 반복(row)
- * 	4.2. 현재 행의 원래 셀 상태(originStatus) 저장
- * 	4.3. 현재 행 약물 투여 여부(drugInputed) true 지정
- * 	4.4. 현재 행 값 ~(1<<열 개수)으로 지정 (A 약물 투여)
- * 	4.5. drugCount+1을 파라미터로 checkPassAvailable() 재귀 호출
- * 		4.5.1. 실행 결과를 currentDrugCount에 입력
- * 	4.6. 현재 행 값 0으로 지정 (B 약물 투여)
- * 	4.7. drugCount+1을 파라미터로 checkPassAvailable() 재귀 호출
- * 		4.7.1. 위 실행 결과와 currentDrugCount 값 비교, 더 작은 값 입력
- * 	4.8. 현재 행 값에 originStatus 입력
- * 	4.9. 현재 행 drugInputed false 지정
+ * 	2.1. 파라미터는 약물 투입 횟수(drugCount), 투입 행 번호(row)
+ * 	2.2. row가 행 길이와 같은 경우 - 해당 필름 상태가 합격인지 아닌지 확인
+ * 		2.2.1. 합격이라면 drugCount와 최소 약물 투입 횟수 비교
+ * 		2.2.2. 함수 실행 종료
+ * 	2.3. row 위치 필름 상태 입력(origin)
+ * 	2.4. drugCount는 그대로, row+1을 파라미터로 checkPassAvailable() 재귀 호출
+ * 	2.5. row 위치 필름 0으로 입력
+ * 	2.6. drugCount+1, row+1을 파라미터로 checkPassAvailable() 재귀 호출
+ * 	2.7. row 위치 필름 2^열 길이-1로 입력
+ * 	2.8. drugCount+1, row+1을 파라미터로 checkPassAvailable() 재귀 호출
+ * 	2.9. row 위치 필름 origin으로 입력
+ * 3. 필름 상태 검사
+ * 	3.1. 합격 기준 개수가 1이면 무조건 true
+ * 	3.2. 각 열마다 반복 (column)
+ * 		3.2.1. 해당 열 검사 여부 false로 초기화
+ * 	3.3. 첫 행~합격 기준 개수 번째 행의 0, 1 개수 계산 (zeroOneFlag)
+ * 	3.4. 첫 번째 행~행 길이-합격 기준 개수 위치까지 반복 (row)
+ * 		3.4.1. 해당 열 검사 여부가 false인 동안 수행
+ * 		3.4.2. zeroOneFlag의 0 혹은 1의 개수가 
+ * 			      합격 기준 개수라면 해당 열 검사 여부 true 지정
+ * 		3.4.3. 열 검사 여부가 true거나 row+합격 기준 개수의 행 길이와 같다면 break
+ * 		3.4.4. row 위치 zeroOneFlag 값 1 감소
+ * 		3.4.5. row+합격 기준 개수 위치 zeroOneFlag 값 1 증가
+ * 	3.5. 해당 열 검사 여부가 false라면 false 반환
+ * 	3.6. 모든 열을 검사한 경우 -> true 반환
+ * 
+ * - 백트래킹 할 여지가 없을까...?? 시간이 겨우 통과한 느낌이라...
  */
 public class ProtectFilm {
 	private static BufferedReader reader;
@@ -55,73 +48,54 @@ public class ProtectFilm {
 	private static int width;
 	private static int passCount;
 	private static int[] films;
-	private static boolean[] drugInputed;
+	private static int minDrugCount;
 
 	public static void main(String[] args) throws IOException {
-		System.setIn(new FileInputStream("resources/sample_input.txt"));
+//		System.setIn(new FileInputStream("resources/sample_input.txt"));
 		int testCaseCount = initializeTest();
 		for (int testCase=1; testCase<=testCaseCount; testCase++) {
 			initialize();
 			// logic
+			checkPassAvailable(0, 0);
 			builder.append("#").append(testCase).append(" ").
-					append(checkPassAvailable(0)).append("\n");
+					append(minDrugCount).append("\n");
 		}
 		System.out.print(builder);
 		reader.close();
 	}
-
-	private static int checkPassAvailable(int drugCount) {
-		if (!checkFilm()) return drugCount;
-		int currentDrugCount = drugCount;
-		for (int row=0; row<thick; row++) {
-			if (drugInputed[row]) continue;
-			int originStatus = films[row];
-			drugInputed[row] = true;
-			films[row] = 0;
-			currentDrugCount = checkPassAvailable(drugCount+1);
-			films[row] = ~(1<<width);
-			currentDrugCount = Integer.min(currentDrugCount, 
-					checkPassAvailable(drugCount+1));
-			films[row] = originStatus;
-			drugInputed[row] = false;
+	
+	private static void checkPassAvailable(int drugCount, int row) {
+		if (row == thick) {
+			if (checkFilm()) 
+				minDrugCount = Integer.min(minDrugCount, drugCount);
+			return;
 		}
-		return currentDrugCount;
+		int origin = films[row];
+		checkPassAvailable(drugCount, row+1);
+		films[row] = 0;
+		checkPassAvailable(drugCount+1, row+1);
+		films[row] = (1<<width)-1;
+		checkPassAvailable(drugCount+1, row+1);
+		films[row] = origin;
 	}
 
 	private static boolean checkFilm() {
-		boolean nonNumericColumn = false;
-//		forLog();
-		for (int columnBit=1; columnBit<(1<<width) && 
-				!nonNumericColumn; columnBit<<=1) {
-//			System.out.printf("[%d]\n", columnBit);
-			int numericCell = 1;
-			int currentTypeFlag = films[0] & columnBit;
-			for (int row=1; row<thick && 
-					numericCell<passCount; row++) {
-				int currentType = films[row] & columnBit;
-//				System.out.printf("%d vs %d\n", currentTypeFlag, currentType);
-				if (currentTypeFlag == currentType)
-					numericCell++;
-				else {
-					currentTypeFlag = currentType;
-					numericCell = 1;
-				}
-//				System.out.println(numericCell);
-//				System.out.printf("%d, %d\n", row, thick);
+		if (passCount == 1) return true;
+		for (int column=0; column<width; column++) {
+			boolean checkColumn = false;
+			int columnFlag = 1<<column;
+			int[] zeroOneFlag = new int[2];
+			for (int row=0; row<passCount; row++)
+				zeroOneFlag[(films[row] & columnFlag) >> column]++;
+			for (int row=0; row<=thick-passCount && !checkColumn; row++) {
+				checkColumn = zeroOneFlag[0] == passCount || zeroOneFlag[1] == passCount;
+				if (checkColumn || row+passCount == thick) break;
+				zeroOneFlag[(films[row] & columnFlag) >> column]--;
+				zeroOneFlag[(films[row+passCount] & columnFlag) >> column]++;
 			}
-			nonNumericColumn = numericCell<passCount;
+			if (!checkColumn) return false;
 		}
-//		System.out.println(nonNumericColumn);
-		return nonNumericColumn;
-	}
-	
-	private static void forLog() {
-		for (int row=0; row<thick; row++) {
-			for (int column=width-1; column>=0; column--)
-				System.out.printf("%-3d", films[row] & (1<<column));
-			System.out.println();
-		}
-		System.out.println();
+		return true;
 	}
 
 	private static int initializeTest() throws IOException {
@@ -141,7 +115,6 @@ public class ProtectFilm {
 			for (int column=width-1; column>=0; column--)
 				films[row] |= Integer.parseInt(tokenizer.nextToken()) << column;
 		}
-		drugInputed = new boolean[thick];
+		minDrugCount = Integer.MAX_VALUE;
 	}
-
 }
