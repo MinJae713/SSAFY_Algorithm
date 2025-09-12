@@ -14,12 +14,12 @@ public class CheckTressure {
 	private static StringBuilder builder;
 	private static StringTokenizer tokenizer;
 	private static int bound;
-	private static int initPosition;
+//	private static int initPosition;
 	private static int[] rooms;
 	private static int tressureCount;
 	private static int[] tressurePosition;
-	private static boolean endOfLeft;
-	private static boolean endOfRight;
+//	private static boolean endOfLeft;
+//	private static boolean endOfRight;
 
 	public static void main(String[] args) throws IOException {
 		// 모르겠다
@@ -44,7 +44,7 @@ public class CheckTressure {
 	private static void initialize() throws IOException {
 		tokenizer = new StringTokenizer(reader.readLine().trim());
 		bound = Integer.parseInt(tokenizer.nextToken());
-		initPosition = Integer.parseInt(tokenizer.nextToken())-1;
+//		initPosition = Integer.parseInt(tokenizer.nextToken())-1;
 		rooms = new int[bound];
 		tokenizer = new StringTokenizer(reader.readLine().trim());
 		for (int index=0; index<bound; index++) {
@@ -55,7 +55,7 @@ public class CheckTressure {
 		int index=0;
 		for (int count=0; count<bound; count++)
 			if (rooms[count] == 1) tressurePosition[index++] = count;
-		endOfLeft = false;
-		endOfRight = false;
+//		endOfLeft = false;
+//		endOfRight = false;
 	}
 }

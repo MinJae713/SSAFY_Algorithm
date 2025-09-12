@@ -24,7 +24,6 @@ import java.util.StringTokenizer;
  */
 public class Hacking2 {
 	private static BufferedReader reader;
-	private static StringBuilder builder;
 	private static StringTokenizer tokenizer;
 	private static int computerCount;
 	private static int trustCount;
@@ -34,7 +33,6 @@ public class Hacking2 {
 	
 	public static void main(String[] args) throws IOException {
 		reader = new BufferedReader(new InputStreamReader(System.in));
-		builder = new StringBuilder();
 		tokenizer = new StringTokenizer(reader.readLine());
 		computerCount = Integer.parseInt(tokenizer.nextToken());
 		hackingPath = new boolean[computerCount+1][computerCount+1];

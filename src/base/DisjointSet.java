@@ -1,13 +1,13 @@
 package base;
 
 public class DisjointSet {
-	private static final int ELEMENT_COUNT = 5;
+//	private static final int ELEMENT_COUNT = 5;
 	private static int[] parentArray;
 	private static int[] rankArray;
-	private static void make() {
-		parentArray = new int[ELEMENT_COUNT+1];
-		rankArray = new int[ELEMENT_COUNT+1];
-	}
+//	private static void make() {
+//		parentArray = new int[ELEMENT_COUNT+1];
+//		rankArray = new int[ELEMENT_COUNT+1];
+//	}
 	public static void union(int element1, int element2) {
 		// 두 노드를 하나의 집합으로 묶음
 		// 각 부모를 찾아옴
