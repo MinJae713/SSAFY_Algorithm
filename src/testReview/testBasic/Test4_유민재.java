@@ -1,4 +1,4 @@
-package testReview;
+package testReview.testBasic;
 
 import java.io.BufferedReader;
 import java.io.IOException;

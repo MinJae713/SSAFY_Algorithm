@@ -1,0 +1,5 @@
+솔루션 코드 완성을 위해 빈칸 ①, ②, ③에 들어갈 코드를 적으시오.(표기된 빈칸의 길이는 실제 코드의 길이와 다르다.)
+* 문제 내용은 PDF의 내용을 확인해주세요.
+① : results[item-1][weight]
+② : results[item-1][weight-weights[item]]+profits[item]
+③ : results[item-1][weight]
